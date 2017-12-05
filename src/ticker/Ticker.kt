@@ -1,6 +1,8 @@
 package ticker
 
 import fresh.FComponent
+import fresh.FProps
+import fresh.FState
 import react.RBuilder
 import kotlin.browser.window
 
@@ -12,9 +14,9 @@ import kotlin.browser.window
 //    var secondsElapsed: Int
 //}
 
-class Ticker : FComponent() {
+class Ticker : FComponent<FProps, FState>() {
     val startFrom by prop(0)
-    var secondsElapsed by state(0)
+    var secondsElapsed by state(startFrom)
 
     override fun componentWillMount() {
         secondsElapsed = startFrom
@@ -34,11 +36,10 @@ class Ticker : FComponent() {
     }
 
     override fun RBuilder.render() {
-        println("Render! $secondsElapsed")
         +"This app has been running for $secondsElapsed seconds."
     }
 }
 
-fun RBuilder.ticker(startFrom: Int = 0) = child(Ticker::class) {
+fun RBuilder.ticker(startFrom: Int = 25) = child(Ticker::class) {
     attrs.values = mapOf("startFrom" to startFrom)
 }

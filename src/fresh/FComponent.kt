@@ -13,28 +13,27 @@ import kotlin.reflect.KProperty
  * In your component, declare state variables using [val foo by state(<initialValue>)].
  * Changes to the variables are reflected in the [FState] via delegation.
  */
-abstract class FComponent : RComponent<FProps, FState>() {
-    override fun shouldComponentUpdate(nextProps: FProps, nextState: FState): Boolean {
+abstract class FComponent<P: FProps, S: FState> : RComponent<P, S>() {
+    override fun shouldComponentUpdate(nextProps: P, nextState: S): Boolean {
         // Should update if any of the values in the state map have changed.
         return state.values != nextState
     }
 
-    fun <T> state(initialValue: T): ReadWriteProperty<FComponent, T> = object : ReadWriteProperty<FComponent, T> {
-        @Suppress("UNCHECKED_CAST")
-        override fun getValue(thisRef: FComponent, property: KProperty<*>): T {
-            return state.values?.get(property.name) as T ?: initialValue
+    fun <T> state(initialValue: T): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
+        @Suppress("UNCHECKED_CAST", "UNNECESSARY_SAFE_CALL") // TODO: Should this SAFE_CALL be removed and allowed to error?
+        override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+            return state?.values?.get(property.name) as T ?: initialValue
         }
 
-        override fun setValue(thisRef: FComponent, property: KProperty<*>, value: T) = setState {
-            println("Setting ${property.name} to $value")
+        override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) = setState {
             values = (values?.toMutableMap() ?: mutableMapOf()).apply { set(property.name, value) }
         }
     }
 
-    fun <T> prop(initialValue: T) : ReadOnlyProperty<FComponent, T> = object : ReadOnlyProperty<FComponent, T> {
-        @Suppress("UNCHECKED_CAST")
-        override fun getValue(thisRef: FComponent, property: KProperty<*>): T {
-            return props.values?.get(property.name) as T ?: initialValue
+    fun <T> prop(initialValue: T) : ReadOnlyProperty<Any?, T> = object : ReadOnlyProperty<Any?, T> {
+        @Suppress("UNCHECKED_CAST", "UNNECESSARY_SAFE_CALL") // TODO: Should this SAFE_CALL be removed and allowed to error?
+        override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+            return props?.values?.get(property.name) as T ?: initialValue
         }
     }
 }
